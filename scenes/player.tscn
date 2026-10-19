@@ -1,0 +1,36 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_player"]
+radius = 12.0
+height = 44.0
+
+[sub_resource type="RectangleShape2D" id="AttackShape"]
+size = Vector2(76, 48)
+
+[node name="Player" type="CharacterBody2D" groups=["player", "characters"]]
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("1_player")
+metadata/entity_type = "player"
+metadata/double_jump_upgrade = "double_jump_unlocked"
+metadata/interaction_role = "controllable_character"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_player")
+
+[node name="Visual" type="Polygon2D" parent="."]
+color = Color(0.18, 0.72, 0.92, 1)
+polygon = PackedVector2Array(-12, -20, 12, -20, 12, 12, 6, 21, -6, 21, -12, 12)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+position_smoothing_speed = 6.0
+
+[node name="AttackArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
+shape = SubResource("AttackShape")
