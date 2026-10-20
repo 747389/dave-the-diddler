@@ -5,6 +5,6 @@
 [resource]
 script = ExtResource("1")
 key = &"overclock"
-display_name = "Overclock (C)"
-description = "Move faster for a short time."
+display_name = "Overdrive (C)"
+description = "Move faster for a short time and gain brief invulnerability when activated."
 cost = 30

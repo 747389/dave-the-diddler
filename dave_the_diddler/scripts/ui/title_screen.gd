@@ -46,7 +46,7 @@ func _build_title_screen() -> void:
 	content.add_child(subtitle)
 
 	var controls := Label.new()
-	controls.text = "MOVE  A/D or ←/→     JUMP  Space     ATTACK  F\nDASH  Q     PAUSE  Esc"
+	controls.text = "MOVE  A/D or ←/→     JUMP  Space     DASH  Q\nM1  LIGHT     M2  HEAVY     PAUSE  Esc"
 	controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	controls.add_theme_font_size_override("font_size", 15)
 	controls.add_theme_color_override("font_color", Color(0.72, 0.78, 0.84))

@@ -6,7 +6,7 @@ signal health_changed(current_health: float, max_health: float)
 ## Tutorial listens for this signal to complete its final objective.
 signal died
 
-@export var max_health: float = 50.0
+@export var max_health: float = 140.0
 
 var health: float = 0.0
 var _is_destroyed: bool = false

@@ -1,8 +1,11 @@
 extends Control
 
+const FRAME_REPAIR_COST: int = 20
+
 var _gear_label: Label
 var _upgrade_list: VBoxContainer
 var _unlock_list: VBoxContainer
+var _repair_button: Button
 
 
 func _ready() -> void:
@@ -50,9 +53,9 @@ func _build_shop() -> void:
 
 	var subtitle := Label.new()
 	if Global.stage_cleared:
-		subtitle.text = "Stage cleared. Spend your gears, then continue to the next arena."
+		subtitle.text = "Stage cleared. Repair your frame, refit, then move to the next arena."
 	else:
-		subtitle.text = "Run over. Spend salvaged gears, then retry this robot."
+		subtitle.text = "A human fell. The machine rebuilds; their gears and technology carry forward."
 	layout.add_child(subtitle)
 
 	var columns := HBoxContainer.new()
@@ -67,13 +70,18 @@ func _build_shop() -> void:
 	footer.add_theme_constant_override("separation", 12)
 	layout.add_child(footer)
 	var restart_button := Button.new()
-	restart_button.text = "Restart arena  (Ctrl + R)"
+	restart_button.text = "Restart from Bolt  (Ctrl + R)"
 	# Button presses call the shared run reset or the stage-aware continuation handler.
 	restart_button.pressed.connect(HelperFunctions.restart_run)
 	footer.add_child(restart_button)
+	if Global.stage_cleared:
+		_repair_button = Button.new()
+		_repair_button.text = "Repair frame · %d gears" % FRAME_REPAIR_COST
+		_repair_button.pressed.connect(_repair_frame)
+		footer.add_child(_repair_button)
 	var continue_button := Button.new()
 	if not Global.stage_cleared:
-		continue_button.text = "Retry Robot %d" % [Global.stage_index + 1]
+		continue_button.text = "Deploy against Bolt"
 	elif Global.stage_index == HelperFunctions.get_stage_count() - 1:
 		continue_button.text = "Finish the five-robot run"
 	else:
@@ -114,6 +122,12 @@ func _refresh_shop(_unused_value: Variant = null, _unused_change: int = 0) -> vo
 		_add_upgrade_card(upgrade_id)
 	for ability_id in DataRegistry.unlocks:
 		_add_unlock_card(ability_id)
+	if is_instance_valid(_repair_button):
+		var maximum_health := 100.0 + HelperFunctions.get_upgrade_value(&"max_health")
+		_repair_button.disabled = (
+			Global.gears < FRAME_REPAIR_COST
+			or Global.carried_player_health >= maximum_health
+		)
 
 
 ## Show one upgrade's current level, next price, and purchase action.
@@ -184,8 +198,17 @@ func _buy_unlock(ability_id: StringName) -> void:
 		_refresh_shop()
 
 
+func _repair_frame() -> void:
+	var maximum_health := 100.0 + HelperFunctions.get_upgrade_value(&"max_health")
+	if Global.gears < FRAME_REPAIR_COST or Global.carried_player_health >= maximum_health:
+		return
+	Global.gears -= FRAME_REPAIR_COST
+	Global.carried_player_health = maximum_health
+	Global.gears_changed.emit(Global.gears, -FRAME_REPAIR_COST)
+
+
 func _start_arena() -> void:
-	# A cleared final stage exits to victory; other clears advance, while deaths retry.
+	# Cleared stages advance, the final clear exits, and a death deploys the next human at Bolt.
 	if Global.stage_cleared:
 		if Global.stage_index == HelperFunctions.get_stage_count() - 1:
 			Global.game_complete = true

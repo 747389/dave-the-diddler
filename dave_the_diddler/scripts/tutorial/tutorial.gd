@@ -110,7 +110,7 @@ func _build_hud() -> void:
 	_objective_label.add_theme_font_size_override("font_size", 18)
 	objective_content.add_child(_objective_label)
 	var controls := Label.new()
-	controls.text = "MOVE A/D or ←/→   JUMP Space/W/↑   ATTACK F   PAUSE Esc"
+	controls.text = "MOVE A/D · JUMP Space · M1 LIGHT · M2 HEAVY · PAUSE Esc"
 	controls.position = Vector2(24.0, 112.0)
 	controls.add_theme_font_size_override("font_size", 13)
 	layer.add_child(controls)
@@ -181,7 +181,7 @@ func _show_objective(index: int) -> void:
 			_objective_label.text = "Jump onto the raised platform with Space, W, or ↑."
 		2:
 			_step_label.text = "TRAINING  //  03 OF 03"
-			_objective_label.text = "Move beside the dummy and attack with F until it breaks."
+			_objective_label.text = "Land 3 M1 light hits, then use M2 for an empowered heavy attack."
 		3:
 			_step_label.text = "TRAINING COMPLETE"
 			_objective_label.text = "You are ready to enter the robot arena."

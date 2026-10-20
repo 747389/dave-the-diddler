@@ -6,7 +6,7 @@
 script = ExtResource("1")
 key = &"jump"
 display_name = "Jump Power"
-description = "Jump higher to reach more platforms."
+description = "Jump higher to evade attacks and land on boss heads."
 effect_type = "multiplier"
 effect_per_level = 0.08
 base_cost = 8

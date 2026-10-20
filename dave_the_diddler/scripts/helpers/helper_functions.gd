@@ -201,36 +201,18 @@ static func get_stage_count() -> int:
 	return DataRegistry.stages.size()
 
 
-## Return a dictionary view of stage data in its explicitly configured order.
-static func get_stage_definition(index: int = -1) -> Dictionary:
-	# Stage order comes from resource data, not directory iteration order.
+## Return a stage resource in campaign order for scene and boss configuration.
+static func get_stage_resource(index: int = -1) -> StageData:
 	var requested_index := Global.stage_index if index < 0 else index
-	if requested_index < 0:
-		return {}
-
 	var stage_resources: Array[StageData] = []
 	for resource in DataRegistry.stages.values():
 		var stage_resource := resource as StageData
 		if stage_resource != null:
 			stage_resources.append(stage_resource)
 	stage_resources.sort_custom(_sort_stage_data)
-	if requested_index >= stage_resources.size():
-		return {}
-
-	var selected_stage := stage_resources[requested_index]
-	return {
-		"name": selected_stage.display_name,
-		"title": selected_stage.title,
-		"health": selected_stage.health,
-		"speed": selected_stage.speed,
-		"contact_damage": selected_stage.contact_damage,
-		"gear_reward": selected_stage.gear_reward,
-		"ability": selected_stage.ability,
-		"arena_color": selected_stage.arena_color,
-		"service_id": selected_stage.service_id,
-		"service_title": selected_stage.service_title,
-		"service_hint": selected_stage.service_hint
-	}
+	if requested_index < 0 or requested_index >= stage_resources.size():
+		return null
+	return stage_resources[requested_index]
 
 
 static func mark_stage_cleared() -> void:
