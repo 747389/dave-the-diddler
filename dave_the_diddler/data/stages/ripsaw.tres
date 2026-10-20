@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/resource_scripts/stage_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+key = &"ripsaw"
+order = 2
+display_name = "Ripsaw, the Cutter"
+title = "STAGE 3 // SHEAR WORKS"
+health = 285.0
+speed = 76.0
+contact_damage = 18.0
+gear_reward = 30
+ability = "Fires three spinning cutters"
+arena_color = Color(0.045, 0.105, 0.12, 1)
+service_id = &"dash_charge"
+service_title = "Dash Recharger"
+service_hint = "Refresh your dash"

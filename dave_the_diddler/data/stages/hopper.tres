@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/resource_scripts/stage_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+key = &"hopper"
+order = 1
+display_name = "Hopper, the Piston"
+title = "STAGE 2 // VERTICAL FOUNDRY"
+health = 190.0
+speed = 68.0
+contact_damage = 15.0
+gear_reward = 22
+ability = "Leaps and landing shockwaves"
+arena_color = Color(0.09, 0.06, 0.12, 1)
+service_id = &"salvage"
+service_title = "Salvage Cache"
+service_hint = "Collect 30 gears"

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/resource_scripts/stage_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+key = &"regent"
+order = 4
+display_name = "Regent, the Machine Heart"
+title = "STAGE 5 // THE CORE CHAMBER"
+health = 560.0
+speed = 74.0
+contact_damage = 25.0
+gear_reward = 60
+ability = "Charges, leaps, and launches scrap drones"
+arena_color = Color(0.12, 0.035, 0.07, 1)
+service_id = &"repair"
+service_title = "Last Repair Station"
+service_hint = "Restore your health before the final fight"

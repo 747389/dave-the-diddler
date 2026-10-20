@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/resource_scripts/unlock_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+key = &"overclock"
+display_name = "Overclock (C)"
+description = "Move faster for a short time."
+cost = 30

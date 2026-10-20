@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/resource_scripts/stage_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+key = &"bulwark"
+order = 3
+display_name = "Bulwark, the Warden"
+title = "STAGE 4 // SHIELD VAULT"
+health = 405.0
+speed = 54.0
+contact_damage = 21.0
+gear_reward = 42
+ability = "Raises a damage-reducing shield"
+arena_color = Color(0.1, 0.075, 0.04, 1)
+service_id = &"shield"
+service_title = "Shield Projector"
+service_hint = "Reduce damage for the next fight"

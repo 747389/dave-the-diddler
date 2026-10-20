@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/resource_scripts/stage_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+key = &"bolt"
+order = 0
+display_name = "Bolt, the Scrapper"
+title = "STAGE 1 // THE SCRAP PIT"
+health = 120.0
+speed = 86.0
+contact_damage = 12.0
+gear_reward = 16
+ability = "Shoulder charge"
+arena_color = Color(0.055, 0.075, 0.11, 1)
+service_id = &"repair"
+service_title = "Repair Station"
+service_hint = "Restore your health"

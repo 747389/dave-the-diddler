@@ -1,0 +1,123 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1_player"]
+
+[sub_resource type="RectangleShape2D" id="RoomFloorShape"]
+size = Vector2(1400, 80)
+
+[sub_resource type="RectangleShape2D" id="RoomWallShape"]
+size = Vector2(80, 600)
+
+[sub_resource type="RectangleShape2D" id="RoomCeilingShape"]
+size = Vector2(1400, 80)
+
+[sub_resource type="RectangleShape2D" id="PlatformShape"]
+size = Vector2(180, 24)
+
+[node name="TestMap" type="Node2D"]
+metadata/map_type = "player_movement_test"
+
+[node name="Background" type="Polygon2D" parent="."]
+color = Color(0.055, 0.075, 0.11, 1)
+polygon = PackedVector2Array(-700, -340, 700, -340, 700, 560, -700, 560)
+
+[node name="RoomFloor" type="StaticBody2D" parent="."]
+position = Vector2(0, 520)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomFloor"]
+shape = SubResource("RoomFloorShape")
+
+[node name="Visual" type="Polygon2D" parent="RoomFloor"]
+color = Color(0.18, 0.23, 0.32, 1)
+polygon = PackedVector2Array(-700, -40, 700, -40, 700, 40, -700, 40)
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+position = Vector2(-660, 220)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+shape = SubResource("RoomWallShape")
+
+[node name="Visual" type="Polygon2D" parent="LeftWall"]
+color = Color(0.18, 0.23, 0.32, 1)
+polygon = PackedVector2Array(-40, -300, 40, -300, 40, 300, -40, 300)
+
+[node name="RightWall" type="StaticBody2D" parent="."]
+position = Vector2(660, 220)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+shape = SubResource("RoomWallShape")
+
+[node name="Visual" type="Polygon2D" parent="RightWall"]
+color = Color(0.18, 0.23, 0.32, 1)
+polygon = PackedVector2Array(-40, -300, 40, -300, 40, 300, -40, 300)
+
+[node name="Ceiling" type="StaticBody2D" parent="."]
+position = Vector2(0, -80)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ceiling"]
+shape = SubResource("RoomCeilingShape")
+
+[node name="Visual" type="Polygon2D" parent="Ceiling"]
+color = Color(0.18, 0.23, 0.32, 1)
+polygon = PackedVector2Array(-700, -40, 700, -40, 700, 40, -700, 40)
+
+[node name="Platforms" type="Node2D" parent="."]
+
+[node name="PlatformLeft" type="StaticBody2D" parent="Platforms"]
+position = Vector2(-390, 420)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/PlatformLeft"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platforms/PlatformLeft"]
+color = Color(0.3, 0.48, 0.63, 1)
+polygon = PackedVector2Array(-90, -12, 90, -12, 90, 12, -90, 12)
+
+[node name="PlatformMiddle" type="StaticBody2D" parent="Platforms"]
+position = Vector2(-100, 320)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/PlatformMiddle"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platforms/PlatformMiddle"]
+color = Color(0.3, 0.48, 0.63, 1)
+polygon = PackedVector2Array(-90, -12, 90, -12, 90, 12, -90, 12)
+
+[node name="PlatformHigh" type="StaticBody2D" parent="Platforms"]
+position = Vector2(200, 220)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/PlatformHigh"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platforms/PlatformHigh"]
+color = Color(0.3, 0.48, 0.63, 1)
+polygon = PackedVector2Array(-90, -12, 90, -12, 90, 12, -90, 12)
+
+[node name="PlatformRight" type="StaticBody2D" parent="Platforms"]
+position = Vector2(430, 390)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Platforms/PlatformRight"]
+shape = SubResource("PlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="Platforms/PlatformRight"]
+color = Color(0.3, 0.48, 0.63, 1)
+polygon = PackedVector2Array(-90, -12, 90, -12, 90, 12, -90, 12)
+
+[node name="Player" parent="." instance=ExtResource("1_player")]
+position = Vector2(-520, 450)

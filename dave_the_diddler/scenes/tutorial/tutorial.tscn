@@ -1,0 +1,50 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/tutorial/tutorial.gd" id="1_tutorial"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/tutorial/training_dummy.tscn" id="3_dummy"]
+
+[sub_resource type="RectangleShape2D" id="TrainingFloorShape"]
+size = Vector2(1520, 80)
+
+[sub_resource type="RectangleShape2D" id="JumpPlatformShape"]
+size = Vector2(220, 24)
+
+[node name="Tutorial" type="Node2D"]
+script = ExtResource("1_tutorial")
+metadata/map_type = "movement_and_combat_training"
+
+[node name="Background" type="Polygon2D" parent="."]
+color = Color(0.035, 0.055, 0.085, 1)
+polygon = PackedVector2Array(-900, -500, 900, -500, 900, 620, -900, 620)
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(0, 520)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("TrainingFloorShape")
+
+[node name="Visual" type="Polygon2D" parent="Floor"]
+color = Color(0.18, 0.23, 0.32, 1)
+polygon = PackedVector2Array(-760, -40, 760, -40, 760, 40, -760, 40)
+
+[node name="JumpPlatform" type="StaticBody2D" parent="."]
+position = Vector2(20, 400)
+collision_layer = 1
+collision_mask = 0
+metadata/objective = "jump_to_platform"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="JumpPlatform"]
+shape = SubResource("JumpPlatformShape")
+
+[node name="Visual" type="Polygon2D" parent="JumpPlatform"]
+color = Color(0.3, 0.48, 0.63, 1)
+polygon = PackedVector2Array(-110, -12, 110, -12, 110, 12, -110, 12)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(-560, 458)
+
+[node name="TrainingDummy" parent="." instance=ExtResource("3_dummy")]
+position = Vector2(465, 453)

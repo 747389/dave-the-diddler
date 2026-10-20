@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockData" format=3 uid="uid://volbd7jtidby"]
+
+[ext_resource type="Script" uid="uid://d1rwfhdr6ujyh" path="res://data/resource_scripts/unlock_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+key = &"emp"
+display_name = "EMP Burst (Z)"
+description = "Damage nearby robots with an electrical pulse."
+cost = 25
