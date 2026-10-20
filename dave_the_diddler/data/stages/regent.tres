@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="StageData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://data/resource_scripts/stage_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/bosses/regent.tscn" id="2_boss"]
+
+[resource]
+script = ExtResource("1")
+key = &"regent"
+order = 4
+display_name = "Regent, the Machine Heart"
+title = "STAGE 5 // THE CORE CHAMBER"
+health = 2800.0
+speed = 74.0
+contact_damage = 25.0
+gear_reward = 60
+boss_scene = ExtResource("2_boss")
+attack_interval = 1.55
+warning_duration = 0.35
+can_jump = true
+can_flash_step = true
+flash_step_distance = 230.0
+attack_damage = 42.0
+ability = "Jumps, flash-steps, radial bolts, and walls"
+arena_color = Color(0.12, 0.035, 0.07, 1)

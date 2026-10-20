@@ -1,0 +1,73 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/arena.gd" id="1_arena"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
+
+[sub_resource type="RectangleShape2D" id="FloorShape"]
+size = Vector2(1120, 80)
+
+[sub_resource type="WorldBoundaryShape2D" id="LeftWorldBoundary"]
+normal = Vector2(1, 0)
+distance = 0.0
+
+[sub_resource type="WorldBoundaryShape2D" id="RightWorldBoundary"]
+normal = Vector2(-1, 0)
+distance = 0.0
+
+[node name="Arena" type="Node2D"]
+script = ExtResource("1_arena")
+metadata/map_type = "robot_arena"
+
+[node name="Background" type="Polygon2D" parent="."]
+color = Color(0.055, 0.075, 0.11, 1)
+polygon = PackedVector2Array(-600, -400, 600, -400, 600, 480, -600, 480)
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(0, 430)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("FloorShape")
+
+[node name="Visual" type="Polygon2D" parent="Floor"]
+color = Color(0.18, 0.23, 0.32, 1)
+polygon = PackedVector2Array(-560, -40, 560, -40, 560, 40, -560, 40)
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+position = Vector2(-520, 20)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+shape = SubResource("LeftWorldBoundary")
+
+[node name="Visual" type="Polygon2D" parent="LeftWall"]
+color = Color(0.22, 0.3, 0.4, 1)
+polygon = PackedVector2Array(-40, -370, 0, -370, 0, 370, -40, 370)
+
+[node name="RightWall" type="StaticBody2D" parent="."]
+position = Vector2(520, 20)
+collision_layer = 1
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+shape = SubResource("RightWorldBoundary")
+
+[node name="Visual" type="Polygon2D" parent="RightWall"]
+color = Color(0.22, 0.3, 0.4, 1)
+polygon = PackedVector2Array(0, -370, 40, -370, 40, 370, 0, 370)
+
+[node name="Conveyor" type="Node2D" parent="."]
+position = Vector2(440, 90)
+metadata/spawn_point = "robot_drop"
+
+[node name="Belt" type="Polygon2D" parent="Conveyor"]
+color = Color(0.62, 0.38, 0.17, 1)
+polygon = PackedVector2Array(-78, -14, 20, -14, 20, 14, -78, 14)
+
+[node name="Mouth" type="Marker2D" parent="Conveyor"]
+position = Vector2(-25, -8)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector2(-400, 360)

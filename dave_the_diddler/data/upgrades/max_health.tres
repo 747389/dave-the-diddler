@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="UpgradeData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/resource_scripts/upgrade_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+key = &"max_health"
+display_name = "Reinforced Frame"
+description = "Increase maximum health."
+effect_type = "bonus"
+effect_per_level = 20
+base_cost = 12
+cost_growth = 1.45
+max_level = 10
