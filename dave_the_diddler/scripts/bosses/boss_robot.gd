@@ -100,6 +100,7 @@ func take_damage(amount: float) -> void:
 		return
 	var applied_damage := minf(amount, health)
 	health = maxf(health - applied_damage, 0.0)
+	HelperFunctions.show_damage_number(self, applied_damage, Color(1.0, 0.86, 0.42))
 	HelperFunctions.award_damage_gears(applied_damage)
 	health_changed.emit(health, max_health)
 	if is_zero_approx(health):
@@ -131,20 +132,21 @@ func _update_custom_motion(_delta: float, _player: Node2D, direction: float) -> 
 
 
 func spawn_circle_hazard(
-	position: Vector2,
+	pos: Vector2,
 	radius: float,
 	tint: Color,
 	damage: float,
 	travel_velocity: Vector2 = Vector2.ZERO,
-	lifetime: float = 3.0
+	lifetime: float = 3.0,
+	fall_gravity: Vector2 = Vector2.ZERO
 ) -> void:
 	var hazard := BossAttack.new()
-	hazard.configure_circle(radius, tint, damage, travel_velocity, lifetime)
-	_add_hazard(hazard, position)
+	hazard.configure_circle(radius, tint, damage, travel_velocity, lifetime, fall_gravity)
+	_add_hazard(hazard, pos)
 
 
 func spawn_rectangle_hazard(
-	position: Vector2,
+	pos: Vector2,
 	size: Vector2,
 	tint: Color,
 	damage: float,
@@ -153,14 +155,14 @@ func spawn_rectangle_hazard(
 ) -> void:
 	var hazard := BossAttack.new()
 	hazard.configure_rectangle(size, tint, damage, travel_velocity, lifetime)
-	_add_hazard(hazard, position)
+	_add_hazard(hazard, pos)
 
 
-func _add_hazard(hazard: BossAttack, position: Vector2) -> void:
+func _add_hazard(hazard: BossAttack, pos: Vector2) -> void:
 	var arena := get_tree().current_scene
 	if arena == null:
 		return
-	hazard.global_position = position
+	hazard.global_position = pos
 	arena.call_deferred("add_child", hazard)
 
 

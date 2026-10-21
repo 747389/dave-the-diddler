@@ -5,21 +5,27 @@ const MOVE_LEFT_ACTION := "move_left"
 const MOVE_RIGHT_ACTION := "move_right"
 const JUMP_ACTION := "jump"
 const DASH_ACTION := "dash"
+const WEAPON_SWAP_ACTION := "weapon_swap"
 const LIGHT_ATTACK_ACTION := "light_attack"
 const HEAVY_ATTACK_ACTION := "heavy_attack"
 const SPECIAL_1_ACTION := "special_1"
 const SPECIAL_2_ACTION := "special_2"
 const SPECIAL_3_ACTION := "special_3"
 const HEAVY_ATTACK_MULTIPLIER: float = 2.0
-const COMBO_HEAVY_MULTIPLIER: float = 1.6
-const COMBO_WINDOW: float = 1.35
 const DASH_IFRAME_TAIL: float = 0.08
 const OVERDRIVE_IFRAME_DURATION: float = 0.7
+const GUN_COOLDOWN: float = 0.5
+const GUN_BASE_DAMAGE: float = 14.0
+const GUN_BASE_CRIT_CHANCE: float = 0.01
+const GUN_BASE_CRIT_MULTIPLIER: float = 2.0
+const PLAYER_BULLET_SCENE: PackedScene = preload("res://scenes/player/attacks/player_bullet.tscn")
 
 ## Emitted on spawn, damage, and healing; Arena connects it to the player health HUD.
 signal health_changed(current_health: float, max_health: float)
 ## Emitted once when health reaches zero; Arena uses it to open the post-death shop.
 signal died
+## Tutorial records confirmed light and heavy sword hits on its melee target.
+signal melee_attack_landed(target: Node2D, is_heavy: bool)
 
 @export var move_speed: float = 260.0
 @export var jump_velocity: float = -410.0
@@ -30,6 +36,8 @@ signal died
 @export var max_health: float = 100.0
 @export var attack_damage: float = 25.0
 @export var attack_cooldown: float = 0.4
+@export var gun_cooldown: float = GUN_COOLDOWN
+@export var gun_damage: float = GUN_BASE_DAMAGE
 
 var _gravity: float = float(ProjectSettings.get_setting("physics/2d/default_gravity"))
 var health: float = 100.0
@@ -39,16 +47,16 @@ var _dash_cooldown_left: float = 0.0
 var _dashes_used: int = 0
 var _bonus_air_dashes: int = 0
 var _facing_direction: float = 1.0
-var _light_attack_cooldown_left: float = 0.0
-var _heavy_attack_cooldown_left: float = 0.0
-var _light_combo_count: int = 0
-var _combo_window_left: float = 0.0
+var _attack_cooldown_left: float = 0.0
 var _invulnerability_time_left: float = 0.0
 var _special_cooldowns: Dictionary = {&"emp": 0.0, &"repair": 0.0, &"overclock": 0.0}
 var _overclock_time_left: float = 0.0
 var _temporary_shield_time: float = 0.0
 var _is_dead: bool = false
-@onready var _visual: Polygon2D = $Visual
+var _equipped_weapon: StringName = &"gun"
+@onready var _visual: CanvasItem = $Visual
+@onready var _gun_visual: Polygon2D = $GunVisual
+@onready var _sword_visual: Polygon2D = $SwordVisual
 @onready var _movement_particles: CPUParticles2D = $MovementParticles
 
 
@@ -63,8 +71,12 @@ func _ready() -> void:
 	jump_velocity *= HelperFunctions.get_upgrade_value(&"jump")
 	dash_speed *= HelperFunctions.get_upgrade_value(&"dash")
 	dash_duration *= HelperFunctions.get_upgrade_value(&"dash_length")
-	attack_damage *= HelperFunctions.get_upgrade_value(&"damage")
+	var damage_multiplier := HelperFunctions.get_upgrade_value(&"damage")
+	attack_damage *= damage_multiplier
+	gun_damage *= damage_multiplier
 	attack_cooldown /= HelperFunctions.get_upgrade_value(&"attack_speed")
+	gun_damage += HelperFunctions.get_upgrade_value(&"gun_damage")
+	gun_cooldown /= HelperFunctions.get_upgrade_value(&"gun_fire_rate")
 	max_health += HelperFunctions.get_upgrade_value(&"max_health")
 	health = max_health
 	if Global.carried_player_health > 0.0:
@@ -75,6 +87,7 @@ func _ready() -> void:
 	Global.bonus_air_dashes = 0
 	_temporary_shield_time = Global.stage_start_shield
 	Global.stage_start_shield = 0.0
+	_update_weapon_visual()
 	health_changed.emit(health, max_health)
 
 
@@ -88,18 +101,15 @@ func _physics_process(delta: float) -> void:
 		_dashes_used = 0
 
 	_dash_cooldown_left = maxf(_dash_cooldown_left - delta, 0.0)
-	_light_attack_cooldown_left = maxf(_light_attack_cooldown_left - delta, 0.0)
-	_heavy_attack_cooldown_left = maxf(_heavy_attack_cooldown_left - delta, 0.0)
-	_combo_window_left = maxf(_combo_window_left - delta, 0.0)
+	_attack_cooldown_left = maxf(_attack_cooldown_left - delta, 0.0)
 	_invulnerability_time_left = maxf(_invulnerability_time_left - delta, 0.0)
 	collision_layer = 0 if _invulnerability_time_left > 0.0 else 2
-	if is_zero_approx(_combo_window_left):
-		_light_combo_count = 0
 	_overclock_time_left = maxf(_overclock_time_left - delta, 0.0)
 	_temporary_shield_time = maxf(_temporary_shield_time - delta, 0.0)
 	for ability_id in _special_cooldowns:
 		_special_cooldowns[ability_id] = maxf(float(_special_cooldowns[ability_id]) - delta, 0.0)
 	_read_movement_input()
+	_update_weapon_visual()
 	_try_jump()
 	_try_dash()
 	_try_attacks()
@@ -121,7 +131,9 @@ func take_damage(amount: float) -> void:
 	var damage_reduction := clampf(HelperFunctions.get_upgrade_value(&"armor"), 0.0, 0.6)
 	if _temporary_shield_time > 0.0:
 		damage_reduction = maxf(damage_reduction, 0.75)
-	health = maxf(health - amount * (1.0 - damage_reduction), 0.0)
+	var actual_damage := minf(health, amount * (1.0 - damage_reduction))
+	health = maxf(health - actual_damage, 0.0)
+	HelperFunctions.show_damage_number(self, actual_damage, Color(1.0, 0.35, 0.38))
 	health_changed.emit(health, max_health)
 	if is_zero_approx(health):
 		_is_dead = true
@@ -148,34 +160,57 @@ func grant_temporary_shield(duration: float) -> void:
 		Global.stage_start_shield = maxf(Global.stage_start_shield, duration)
 
 
-## Run M1 light hits and M2 heavy hits, empowering a heavy attack after a three-hit chain.
+## Swap weapons with Tab; share one attack lockout so light and heavy cannot bypass each other.
 func _try_attacks() -> void:
+	if Input.is_action_just_pressed(WEAPON_SWAP_ACTION):
+		_equipped_weapon = &"sword" if _equipped_weapon == &"gun" else &"gun"
+		_update_weapon_visual()
+	if _attack_cooldown_left > 0.0:
+		return
 	# Heavy input wins if both mouse buttons are pressed in the same frame.
 	if Input.is_action_just_pressed(HEAVY_ATTACK_ACTION):
-		if _heavy_attack_cooldown_left > 0.0:
+		# The gun has no heavy attack; M2 is reserved for the sword's heavy strike.
+		if _equipped_weapon == &"gun":
 			return
 		var heavy_damage := attack_damage * HEAVY_ATTACK_MULTIPLIER
-		if _light_combo_count >= 3 and _combo_window_left > 0.0:
-			heavy_damage *= COMBO_HEAVY_MULTIPLIER
-		_heavy_attack_cooldown_left = attack_cooldown * 2.0
-		_light_combo_count = 0
-		_combo_window_left = 0.0
-		_perform_attack(heavy_damage, Vector2(1.35, 1.15))
+		_attack_cooldown_left = attack_cooldown * 2.0
+		_perform_attack(heavy_damage, Vector2(1.35, 1.15), true)
 		return
 
-	if not Input.is_action_just_pressed(LIGHT_ATTACK_ACTION) or _light_attack_cooldown_left > 0.0:
+	if not Input.is_action_pressed(LIGHT_ATTACK_ACTION):
 		return
-	_light_attack_cooldown_left = attack_cooldown
-	var next_combo_count := mini(_light_combo_count + 1, 3) if _combo_window_left > 0.0 else 1
-	if _perform_attack(attack_damage, Vector2.ONE):
-		_light_combo_count = next_combo_count
-		_combo_window_left = COMBO_WINDOW
-	else:
-		_light_combo_count = 0
-		_combo_window_left = 0.0
+	if _equipped_weapon == &"gun":
+		_fire_gun()
+		return
+	_attack_cooldown_left = attack_cooldown
+	_perform_attack(attack_damage, Vector2.ONE)
 
 
-func _perform_attack(damage: float, area_scale: Vector2) -> bool:
+## Fire each unlimited-ammo projectile with its own critical roll and upgraded damage multiplier.
+func _fire_gun() -> void:
+	_attack_cooldown_left = gun_cooldown
+	var critical_chance := GUN_BASE_CRIT_CHANCE + HelperFunctions.get_upgrade_value(&"gun_crit_chance")
+	var critical_multiplier := GUN_BASE_CRIT_MULTIPLIER + HelperFunctions.get_upgrade_value(&"gun_crit_damage")
+	var muzzle_position := _gun_visual.to_global(Vector2(12.0, 0.0))
+	var aim_direction := muzzle_position.direction_to(get_global_mouse_position())
+	if aim_direction.is_zero_approx():
+		aim_direction = Vector2(_facing_direction, 0.0)
+	var directions: Array[Vector2] = [aim_direction]
+	if HelperFunctions.is_ability_unlocked(&"double_shot"):
+		directions = [aim_direction.rotated(-0.045), aim_direction.rotated(0.045)]
+	for direction in directions:
+		var shot := PLAYER_BULLET_SCENE.instantiate() as Area2D
+		if shot == null:
+			continue
+		get_tree().current_scene.add_child(shot)
+		shot.global_position = muzzle_position
+		var shot_damage := gun_damage
+		if randf() < critical_chance:
+			shot_damage *= critical_multiplier
+		shot.call("launch", direction.normalized(), shot_damage)
+
+
+func _perform_attack(damage: float, area_scale: Vector2, is_heavy: bool = false) -> bool:
 	# Move and size the melee hitbox before querying current overlaps.
 	var attack_area := $AttackArea as Area2D
 	attack_area.position.x = 34.0 * _facing_direction
@@ -183,6 +218,7 @@ func _perform_attack(damage: float, area_scale: Vector2) -> bool:
 	var hit_target := false
 	for body in attack_area.get_overlapping_bodies():
 		if body.has_method("take_damage"):
+			melee_attack_landed.emit(body, is_heavy)
 			body.call("take_damage", damage)
 			hit_target = true
 	return hit_target
@@ -236,6 +272,7 @@ func _read_movement_input() -> void:
 	var effective_speed := move_speed * (1.5 if _overclock_time_left > 0.0 else 1.0)
 	if not is_zero_approx(direction):
 		_facing_direction = signf(direction)
+		_update_weapon_visual()
 		if _dash_time_left <= 0.0:
 			velocity.x = direction * effective_speed
 	elif _dash_time_left <= 0.0:
@@ -268,6 +305,7 @@ func _try_dash() -> void:
 		direction = _facing_direction
 
 	_facing_direction = signf(direction)
+	_update_weapon_visual()
 	velocity = Vector2(_facing_direction * dash_speed, 0.0)
 	_dash_time_left = dash_duration
 	_dash_cooldown_left = dash_cooldown
@@ -293,7 +331,8 @@ func _ensure_input_actions() -> void:
 	_add_key_action(MOVE_LEFT_ACTION, KEY_A, KEY_LEFT)
 	_add_key_action(MOVE_RIGHT_ACTION, KEY_D, KEY_RIGHT)
 	_add_key_action(JUMP_ACTION, KEY_SPACE, KEY_W, KEY_UP)
-	_add_key_action(DASH_ACTION, KEY_Q)
+	_add_key_action(DASH_ACTION, KEY_SHIFT)
+	_add_key_action(WEAPON_SWAP_ACTION, KEY_TAB)
 	_add_mouse_action(LIGHT_ATTACK_ACTION, MOUSE_BUTTON_LEFT)
 	_add_mouse_action(HEAVY_ATTACK_ACTION, MOUSE_BUTTON_RIGHT)
 	_add_key_action(SPECIAL_1_ACTION, KEY_Z)
@@ -342,3 +381,14 @@ func _update_invulnerability_visual() -> void:
 		return
 	var blink_phase := floori(float(Time.get_ticks_msec()) / 80.0)
 	_visual.modulate.a = 0.5 if blink_phase % 2 == 0 else 1.0
+
+
+## Show the equipped weapon and keep it facing the same direction as the player.
+func _update_weapon_visual() -> void:
+	var target_in_player_space := to_local(get_global_mouse_position())
+	var aim_offset := target_in_player_space - _gun_visual.position
+	_gun_visual.rotation = aim_offset.angle()
+	_gun_visual.scale = Vector2.ONE
+	_sword_visual.scale = Vector2(_facing_direction, 1.0)
+	_gun_visual.visible = _equipped_weapon == &"gun"
+	_sword_visual.visible = _equipped_weapon == &"sword"

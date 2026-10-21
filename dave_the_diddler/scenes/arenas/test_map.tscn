@@ -1,75 +1,74 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://dj0pfmj1iqaem"]
 
-[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" uid="uid://6b020l5qfx7x" path="res://scenes/player/player.tscn" id="1_player"]
+[ext_resource type="PackedScene" path="res://scenes/world/fall_boundary.tscn" id="2_fall_boundary"]
 
 [sub_resource type="RectangleShape2D" id="RoomFloorShape"]
 size = Vector2(1400, 80)
 
 [sub_resource type="WorldBoundaryShape2D" id="LeftWorldBoundary"]
 normal = Vector2(1, 0)
-distance = 0.0
 
 [sub_resource type="WorldBoundaryShape2D" id="RightWorldBoundary"]
 normal = Vector2(-1, 0)
-distance = 0.0
 
 [sub_resource type="RectangleShape2D" id="RoomCeilingShape"]
 size = Vector2(1400, 80)
 
-[node name="TestMap" type="Node2D"]
+[node name="TestMap" type="Node2D" unique_id=1488773381]
 metadata/map_type = "player_movement_test"
 
-[node name="Background" type="Polygon2D" parent="."]
+[node name="Background" type="Polygon2D" parent="." unique_id=1307794192]
 color = Color(0.055, 0.075, 0.11, 1)
 polygon = PackedVector2Array(-700, -340, 700, -340, 700, 560, -700, 560)
 
-[node name="RoomFloor" type="StaticBody2D" parent="."]
+[node name="RoomFloor" type="StaticBody2D" parent="." unique_id=91268122]
 position = Vector2(0, 520)
-collision_layer = 1
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomFloor"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RoomFloor" unique_id=2028424922]
 shape = SubResource("RoomFloorShape")
 
-[node name="Visual" type="Polygon2D" parent="RoomFloor"]
+[node name="Visual" type="Polygon2D" parent="RoomFloor" unique_id=722598274]
 color = Color(0.18, 0.23, 0.32, 1)
 polygon = PackedVector2Array(-700, -40, 700, -40, 700, 40, -700, 40)
 
-[node name="LeftWall" type="StaticBody2D" parent="."]
+[node name="LeftWall" type="StaticBody2D" parent="." unique_id=1380100810]
 position = Vector2(-620, 220)
-collision_layer = 1
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall" unique_id=2063631375]
 shape = SubResource("LeftWorldBoundary")
 
-[node name="Visual" type="Polygon2D" parent="LeftWall"]
+[node name="Visual" type="Polygon2D" parent="LeftWall" unique_id=426989703]
 color = Color(0.18, 0.23, 0.32, 1)
 polygon = PackedVector2Array(-80, -300, 0, -300, 0, 300, -80, 300)
 
-[node name="RightWall" type="StaticBody2D" parent="."]
+[node name="RightWall" type="StaticBody2D" parent="." unique_id=1059960885]
 position = Vector2(620, 220)
-collision_layer = 1
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall" unique_id=333288363]
 shape = SubResource("RightWorldBoundary")
 
-[node name="Visual" type="Polygon2D" parent="RightWall"]
+[node name="Visual" type="Polygon2D" parent="RightWall" unique_id=407619528]
 color = Color(0.18, 0.23, 0.32, 1)
 polygon = PackedVector2Array(0, -300, 80, -300, 80, 300, 0, 300)
 
-[node name="Ceiling" type="StaticBody2D" parent="."]
+[node name="Ceiling" type="StaticBody2D" parent="." unique_id=667976172]
 position = Vector2(0, -80)
-collision_layer = 1
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Ceiling"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ceiling" unique_id=942132122]
 shape = SubResource("RoomCeilingShape")
 
-[node name="Visual" type="Polygon2D" parent="Ceiling"]
+[node name="Visual" type="Polygon2D" parent="Ceiling" unique_id=304126217]
 color = Color(0.18, 0.23, 0.32, 1)
 polygon = PackedVector2Array(-700, -40, 700, -40, 700, 40, -700, 40)
 
-[node name="Player" parent="." instance=ExtResource("1_player")]
+[node name="Player" parent="." unique_id=543016312 instance=ExtResource("1_player")]
 position = Vector2(-520, 450)
+
+[node name="FallBoundary" parent="." unique_id=1354974163 instance=ExtResource("2_fall_boundary")]
+position = Vector2(0, 700)
+spawn_position = Vector2(-520, 450)

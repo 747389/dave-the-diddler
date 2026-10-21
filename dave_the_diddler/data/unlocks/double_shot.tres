@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UnlockData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/resource_scripts/unlock_data.gd" id="1_unlock"]
+
+[resource]
+script = ExtResource("1_unlock")
+key = &"double_shot"
+display_name = "Double Shot"
+description = "Fire two rounds in a tight spread. A costly permanent weapon system unlock."
+cost = 250

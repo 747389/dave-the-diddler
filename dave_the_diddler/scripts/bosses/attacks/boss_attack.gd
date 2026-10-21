@@ -3,6 +3,7 @@ extends Area2D
 
 var damage: float = 1.0
 var travel_velocity: Vector2 = Vector2.ZERO
+var grav: Vector2 = Vector2.ZERO
 var lifetime: float = 3.0
 
 
@@ -16,9 +17,17 @@ func _ready() -> void:
 	add_to_group("arena_hazards")
 
 
-func configure_circle(radius: float, tint: Color, hit_damage: float, velocity: Vector2, duration: float) -> void:
+func configure_circle(
+	radius: float,
+	tint: Color,
+	hit_damage: float,
+	velocity: Vector2,
+	duration: float,
+	fall_gravity: Vector2 = Vector2.ZERO
+) -> void:
 	damage = hit_damage
 	travel_velocity = velocity
+	grav = fall_gravity
 	lifetime = duration
 	var collision := CollisionShape2D.new()
 	var circle := CircleShape2D.new()
@@ -61,6 +70,7 @@ func configure_rectangle(
 
 func _physics_process(delta: float) -> void:
 	lifetime -= delta
+	travel_velocity += grav * delta
 	global_position += travel_velocity * delta
 	if lifetime <= 0.0:
 		queue_free()

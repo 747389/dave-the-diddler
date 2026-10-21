@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/title_screen.gd" id="1_title"]
+[ext_resource type="LabelSettings" path="res://assets/ui/input_tip_label.tres" id="2_input_tip"]
 
 [node name="TitleScreen" type="Control"]
 layout_mode = 3
@@ -10,3 +11,76 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_title")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.035, 0.055, 0.085, 1)
+
+[node name="Accent" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 12.0
+offset_bottom = 720.0
+color = Color(0.95, 0.38, 0.16, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(440, 0)
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Eyebrow" type="Label" parent="Center/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "A HUMANITY HOLDS THE LINE GAME"
+horizontal_alignment = 1
+
+[node name="Title" type="Label" parent="Center/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "MAN  VS  MACHINE"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Center/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Five robots. One scrap-built fighter."
+horizontal_alignment = 1
+
+[node name="Controls" type="Label" parent="Center/Content"]
+layout_mode = 2
+label_settings = ExtResource("2_input_tip")
+theme_override_colors/font_color = Color(0.72, 0.78, 0.84, 1)
+theme_override_font_sizes/font_size = 15
+text = "MOVE  A/D or ←/→     JUMP  Space     DASH  Shift\nGUN  M1 FIRE     SWORD  M1 LIGHT / M2 HEAVY     PAUSE  Esc"
+horizontal_alignment = 1
+
+[node name="StartButton" type="Button" parent="Center/Content"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "START CAMPAIGN"
+
+[node name="TutorialButton" type="Button" parent="Center/Content"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "TRAINING"
+
+[node name="QuitButton" type="Button" parent="Center/Content"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "QUIT"

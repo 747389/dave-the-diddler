@@ -1,19 +1,19 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://qbxlufoebl7r"]
 
-[ext_resource type="Script" path="res://scripts/tutorial/training_dummy.gd" id="1_dummy"]
+[ext_resource type="Script" uid="uid://byikg3kua8mv1" path="res://scripts/tutorial/training_dummy.gd" id="1_dummy"]
 
 [sub_resource type="RectangleShape2D" id="DummyCollision"]
 size = Vector2(42, 54)
 
-[node name="TrainingDummy" type="StaticBody2D" groups=["training_targets"]]
+[node name="TrainingDummy" type="StaticBody2D" unique_id=570491119 groups=["training_targets"]]
 collision_layer = 4
 collision_mask = 0
 script = ExtResource("1_dummy")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=77623414]
 shape = SubResource("DummyCollision")
 
-[node name="Visual" type="Polygon2D" parent="."]
+[node name="Visual" type="Polygon2D" parent="." unique_id=1002652724]
 position = Vector2(0, -3)
 color = Color(0.86, 0.38, 0.22, 1)
 polygon = PackedVector2Array(-21, -24, 21, -24, 18, 12, 8, 24, -8, 24, -18, 12)
