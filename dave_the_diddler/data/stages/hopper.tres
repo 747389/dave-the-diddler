@@ -20,5 +20,5 @@ can_jump = false
 can_flash_step = false
 flash_step_distance = 150.0
 attack_damage = 30.0
-ability = "Ground shockwave / warned sky pillar"
+ability = "Ripple waves — stand on its head"
 arena_color = Color(0.09, 0.06, 0.12, 1)

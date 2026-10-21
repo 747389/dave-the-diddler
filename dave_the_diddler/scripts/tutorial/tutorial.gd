@@ -1,51 +1,37 @@
 extends Node2D
 
-const MOVE_TARGET_X: float = 450.0
-const JUMP_TARGET_MIN_X: float = 540.0
-const JUMP_TARGET_MAX_X: float = 720.0
-const GAP_COMPLETION_X: float = 1450.0
+const PAUSE_MENU_SCENE: PackedScene = preload("res://scenes/ui/pause_menu.tscn")
+const MOVE_TARGET_X: float = -270.0
+const JUMP_TARGET_MIN_X: float = -95.0
+const JUMP_TARGET_MAX_X: float = 135.0
 
 @onready var player: Player = $Player
-@onready var shoot_dummy: TrainingDummy = $ShootDummy
-@onready var melee_dummy: TrainingDummy = $MeleeDummy
-@onready var final_dummy: TrainingDummy = $FinalDummy
-@onready var _objective_label: Label = $TutorialHUD/ObjectivePanel/MarginContainer/ObjectiveContent/ObjectiveText
-@onready var _step_label: Label = $TutorialHUD/ObjectivePanel/MarginContainer/ObjectiveContent/StepText
-@onready var _controls_label: Label = $TutorialHUD/ControlsText
-@onready var _dummy_health_bar: ProgressBar = $TutorialHUD/DummyPanel/DummyContent/DummyHealthBar
-@onready var _dummy_health_text: Label = $TutorialHUD/DummyPanel/DummyContent/DummyHealthText
-@onready var _dummy_panel: PanelContainer = $TutorialHUD/DummyPanel
-@onready var _completion_panel: PanelContainer = $TutorialHUD/CompletionPanel
-@onready var _pause_menu: PauseMenu = $TutorialHUD/PauseMenu
-@onready var _campaign_button: Button = $TutorialHUD/CompletionPanel/CompletionContent/CampaignButton
-@onready var _title_button: Button = $TutorialHUD/CompletionPanel/CompletionContent/TitleButton
+@onready var training_dummy: TrainingDummy = $TrainingDummy
 
 var _objective_index: int = 0
-var _active_dummy: TrainingDummy
-var _melee_light_used: bool = false
-var _melee_heavy_used: bool = false
+var _objective_label: Label
+var _step_label: Label
+var _dummy_health_bar: ProgressBar
+var _dummy_health_text: Label
+var _dummy_panel: PanelContainer
+var _completion_panel: PanelContainer
+var _pause_menu: PauseMenu
 var _target_markers: Array[Node2D] = []
 
 
-## Prepare the six-step lesson and connect its dummy and player event signals.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	player.process_mode = Node.PROCESS_MODE_PAUSABLE
 	_build_objective_markers()
-	# The completion scene buttons connect to the existing campaign and title actions.
-	_campaign_button.pressed.connect(HelperFunctions.start_new_run)
-	_title_button.pressed.connect(_return_to_title)
-	# Each target reports its health, then passes itself to the defeat handler.
-	for dummy in [shoot_dummy, melee_dummy, final_dummy]:
-		dummy.deactivate()
-		dummy.health_changed.connect(_update_dummy_health)
-		dummy.died.connect(_on_dummy_died.bind(dummy))
-	# Confirmed sword hits let the melee objective require both attack buttons.
-	player.melee_attack_landed.connect(_on_melee_attack_landed)
+	_build_hud()
+	# The tutorial observes the dummy's health and defeat signals to finish the final task.
+	training_dummy.health_changed.connect(_update_dummy_health)
+	training_dummy.died.connect(_on_dummy_died)
+	_update_dummy_health(training_dummy.health, training_dummy.max_health)
 	_show_objective(0)
 
 
-## Advance movement, jump, and gap steps only after their world-space conditions are met.
+## Advance the move and jump steps only after the player reaches each world target.
 func _process(_delta: float) -> void:
 	if get_tree().paused:
 		return
@@ -59,12 +45,9 @@ func _process(_delta: float) -> void:
 				player.is_on_floor()
 				and player.global_position.x >= JUMP_TARGET_MIN_X
 				and player.global_position.x <= JUMP_TARGET_MAX_X
-				and player.global_position.y < 900.0
+				and player.global_position.y < 420.0
 			):
 				_show_objective(2)
-		4:
-			if player.global_position.x > GAP_COMPLETION_X:
-				_show_objective(5)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -73,14 +56,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		_toggle_pause()
 
 
-## Draw a marker for each movement, aiming, melee, traversal, and final combat objective.
+## Draw world-space markers above the move target, ledge, and training dummy.
 func _build_objective_markers() -> void:
-	_target_markers.append(_make_target_marker(Vector2(MOVE_TARGET_X, 950), "MOVE HERE"))
-	_target_markers.append(_make_target_marker(Vector2(650, 875), "JUMP HERE"))
-	_target_markers.append(_make_target_marker(Vector2(900, 775), "SHOOT DUMMY"))
-	_target_markers.append(_make_target_marker(Vector2(500, 950), "MELEE DUMMY"))
-	_target_markers.append(_make_target_marker(Vector2(1100, 950), "JUMP + DASH"))
-	_target_markers.append(_make_target_marker(Vector2(1610, 950), "FINAL TARGET"))
+	_target_markers.append(_make_target_marker(Vector2(MOVE_TARGET_X, 450), "MOVE HERE"))
+	_target_markers.append(_make_target_marker(Vector2(20, 350), "JUMP HERE"))
+	_target_markers.append(_make_target_marker(Vector2(465, 365), "ATTACK DUMMY"))
 
 
 ## Create a world-space ring and label that identify one tutorial objective.
@@ -109,55 +89,100 @@ func _make_target_marker(marker_position: Vector2, marker_text: String) -> Node2
 	return marker
 
 
+## Create the objective HUD, dummy health display, completion card, and shared pause menu.
+func _build_hud() -> void:
+	var layer := CanvasLayer.new()
+	layer.name = "TutorialHUD"
+	add_child(layer)
+
+	var objective_panel := PanelContainer.new()
+	objective_panel.position = Vector2(24.0, 20.0)
+	objective_panel.custom_minimum_size = Vector2(430.0, 0.0)
+	layer.add_child(objective_panel)
+	var objective_content := VBoxContainer.new()
+	objective_content.add_theme_constant_override("separation", 5)
+	objective_panel.add_child(objective_content)
+	_step_label = Label.new()
+	_step_label.add_theme_font_size_override("font_size", 14)
+	objective_content.add_child(_step_label)
+	_objective_label = Label.new()
+	_objective_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_objective_label.add_theme_font_size_override("font_size", 18)
+	objective_content.add_child(_objective_label)
+	var controls := Label.new()
+	controls.text = "MOVE A/D · JUMP Space · M1 LIGHT · M2 HEAVY · PAUSE Esc"
+	controls.position = Vector2(24.0, 112.0)
+	controls.add_theme_font_size_override("font_size", 13)
+	layer.add_child(controls)
+
+	_dummy_panel = PanelContainer.new()
+	_dummy_panel.position = Vector2(890.0, 22.0)
+	_dummy_panel.custom_minimum_size = Vector2(350.0, 0.0)
+	layer.add_child(_dummy_panel)
+	var dummy_content := VBoxContainer.new()
+	dummy_content.add_theme_constant_override("separation", 5)
+	_dummy_panel.add_child(dummy_content)
+	_dummy_health_text = Label.new()
+	_dummy_health_text.text = "TRAINING DUMMY"
+	_dummy_health_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	dummy_content.add_child(_dummy_health_text)
+	_dummy_health_bar = ProgressBar.new()
+	_dummy_health_bar.custom_minimum_size = Vector2(0.0, 18.0)
+	_dummy_health_bar.show_percentage = false
+	dummy_content.add_child(_dummy_health_bar)
+	_dummy_panel.visible = false
+
+	_completion_panel = PanelContainer.new()
+	_completion_panel.custom_minimum_size = Vector2(430.0, 0.0)
+	_completion_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_completion_panel.visible = false
+	layer.add_child(_completion_panel)
+	var completion_content := VBoxContainer.new()
+	completion_content.add_theme_constant_override("separation", 12)
+	_completion_panel.add_child(completion_content)
+	var completion_title := Label.new()
+	completion_title.text = "TRAINING COMPLETE"
+	completion_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	completion_title.add_theme_font_size_override("font_size", 26)
+	completion_content.add_child(completion_title)
+	var completion_text := Label.new()
+	completion_text.text = "You can move, jump, and break a robot. The campaign is ready."
+	completion_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	completion_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	completion_content.add_child(completion_text)
+	var campaign_button := Button.new()
+	campaign_button.text = "START CAMPAIGN"
+	# The completion card can immediately reset the run and enter the campaign.
+	campaign_button.pressed.connect(HelperFunctions.start_new_run)
+	completion_content.add_child(campaign_button)
+	var title_button := Button.new()
+	title_button.text = "RETURN TO TITLE"
+	title_button.pressed.connect(_return_to_title)
+	completion_content.add_child(title_button)
+
+	_pause_menu = PAUSE_MENU_SCENE.instantiate() as PauseMenu
+	if _pause_menu != null:
+		layer.add_child(_pause_menu)
+
+
 ## Update instructions, target visibility, dummy health, and the completion card.
 func _show_objective(index: int) -> void:
 	_objective_index = index
 	for marker_index in _target_markers.size():
-		_target_markers[marker_index].visible = marker_index == index and index < 6
-	var next_dummy: TrainingDummy
-	match index:
-		2:
-			next_dummy = shoot_dummy
-		3:
-			next_dummy = melee_dummy
-		5:
-			next_dummy = final_dummy
-	if is_instance_valid(_active_dummy) and _active_dummy != next_dummy:
-		_active_dummy.deactivate()
-	_active_dummy = next_dummy
-	if index == 3:
-		_melee_light_used = false
-		_melee_heavy_used = false
-	if is_instance_valid(_active_dummy):
-		_active_dummy.activate()
-		_dummy_panel.visible = true
-	else:
-		_dummy_panel.visible = false
+		_target_markers[marker_index].visible = marker_index == index and index < 3
+	_dummy_panel.visible = index == 2
 
 	match index:
 		0:
-			_step_label.text = "TRAINING  //  01 OF 06"
+			_step_label.text = "TRAINING  //  01 OF 03"
 			_objective_label.text = "Move right to the yellow marker using A/D or ←/→."
 		1:
-			_step_label.text = "TRAINING  //  02 OF 06"
+			_step_label.text = "TRAINING  //  02 OF 03"
 			_objective_label.text = "Jump onto the raised platform with Space, W, or ↑."
 		2:
-			_step_label.text = "TRAINING  //  03 OF 06"
-			_objective_label.text = "Point the gun at the dummy with your mouse. Click M1 until it breaks; ammo is unlimited."
-			_controls_label.text = "AIM WITH MOUSE · M1 FIRE"
+			_step_label.text = "TRAINING  //  03 OF 03"
+			_objective_label.text = "Land 3 M1 light hits, then use M2 for an empowered heavy attack."
 		3:
-			_step_label.text = "TRAINING  //  04 OF 06"
-			_objective_label.text = "Press Tab to equip the sword. Hit this dummy with both M1 light and M2 heavy attacks."
-			_controls_label.text = "TAB SWORD · M1 LIGHT · M2 HEAVY"
-		4:
-			_step_label.text = "TRAINING  //  05 OF 06"
-			_objective_label.text = "Jump and dash over the whole gap"
-			_controls_label.text = "JUMP · SHIFT DASH"
-		5:
-			_step_label.text = "TRAINING  //  06 OF 06"
-			_objective_label.text = "Defeat the final dummy using any weapon or attack."
-			_controls_label.text = "ANY WEAPON · ANY ATTACK"
-		6:
 			_step_label.text = "TRAINING COMPLETE"
 			_objective_label.text = "You are ready to enter the robot arena."
 			_completion_panel.visible = true
@@ -166,39 +191,15 @@ func _show_objective(index: int) -> void:
 func _update_dummy_health(current_health: float, maximum_health: float) -> void:
 	_dummy_health_bar.max_value = maximum_health
 	_dummy_health_bar.value = current_health
-	var target_name := _active_dummy.display_name if is_instance_valid(_active_dummy) else "TRAINING DUMMY"
-	_dummy_health_text.text = "%s  ·  %d / %d" % [
-		target_name,
+	_dummy_health_text.text = "TRAINING DUMMY  ·  %d / %d" % [
 		roundi(current_health),
 		roundi(maximum_health)
 	]
 
 
-func _on_dummy_died(dummy: TrainingDummy) -> void:
-	# A defeated active target advances to the next lesson; the final target opens completion.
-	if dummy != _active_dummy:
-		return
-	match _objective_index:
-		2:
-			_show_objective(_objective_index + 1)
-		3:
-			if not _melee_light_used or not _melee_heavy_used:
-				_active_dummy.activate()
-				_objective_label.text = "Use both M1 light and M2 heavy attacks. The dummy is restored so you can finish the lesson."
-				return
-			_show_objective(4)
-		5:
-			_show_objective(6)
-
-
-func _on_melee_attack_landed(target: Node2D, is_heavy: bool) -> void:
-	# Record only landed sword strikes against the active melee lesson target.
-	if _objective_index != 3 or target != melee_dummy:
-		return
-	if is_heavy:
-		_melee_heavy_used = true
-	else:
-		_melee_light_used = true
+func _on_dummy_died() -> void:
+	# The dummy emits died after its health_changed signal reaches zero.
+	_show_objective(3)
 
 
 func _toggle_pause() -> void:

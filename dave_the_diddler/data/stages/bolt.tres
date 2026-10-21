@@ -20,5 +20,5 @@ can_jump = false
 can_flash_step = false
 flash_step_distance = 150.0
 attack_damage = 28.0
-ability = "Decelerating teleport dash — jump its path"
+ability = "Cross-arena charge — jump over"
 arena_color = Color(0.055, 0.075, 0.11, 1)

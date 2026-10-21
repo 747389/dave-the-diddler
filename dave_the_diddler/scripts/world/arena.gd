@@ -1,24 +1,26 @@
 extends Node2D
 
 const PLATFORM_SCENE: PackedScene = preload("res://scenes/world/intermission/intermission_platform.tscn")
-const BOSS_SPAWN_POSITION := Vector2(300.0, 368.0)
+const PAUSE_MENU_SCENE: PackedScene = preload("res://scenes/ui/pause_menu.tscn")
 
 @onready var player: Player = $Player
+@onready var conveyor_mouth: Marker2D = $Conveyor/Mouth
 @onready var background: Polygon2D = $Background
 @onready var floor_visual: Polygon2D = $Floor/Visual
 @onready var left_wall_visual: Polygon2D = $LeftWall/Visual
 @onready var right_wall_visual: Polygon2D = $RightWall/Visual
-@onready var _player_health_bar: ProgressBar = $HUD/Frame/PlayerStatus/PlayerHealthBar
-@onready var _player_health_label: Label = $HUD/Frame/PlayerStatus/PlayerName
-@onready var _boss_health_bar: ProgressBar = $HUD/Frame/BossStatus/BossHealthBar
-@onready var _boss_label: Label = $HUD/Frame/BossStatus/BossName
-@onready var _boss_detail_label: Label = $HUD/Frame/BossStatus/BossDetail
-@onready var _boss_health_value_label: Label = $HUD/Frame/BossHealthValue
-@onready var _station_hint: Label = $HUD/Frame/StationHint
-@onready var _pause_menu: PauseMenu = $HUD/Frame/PauseMenu
+@onready var conveyor_visual: Polygon2D = $Conveyor/Belt
 
 var _boss: BossRobot
 var _active_platform: IntermissionPlatform
+var _player_health_bar: ProgressBar
+var _player_health_label: Label
+var _gear_label: Label
+var _boss_health_bar: ProgressBar
+var _boss_label: Label
+var _stage_label: Label
+var _station_hint: Label
+var _pause_menu: PauseMenu
 var _stage_complete: bool = false
 
 
@@ -32,12 +34,14 @@ func _ready() -> void:
 		push_error("Arena: no stage resource is available for the current map.")
 		return
 	_build_arena_variant(stage)
-	_boss_label.text = stage.display_name
-	_boss_detail_label.text = stage.ability
+	_build_hud(stage)
 	# Player health and death signals update the HUD or send the run to the shop.
 	player.health_changed.connect(_update_player_health)
 	player.died.connect(_on_player_died)
+	# Global gear changes refresh the arena HUD while the fight is active.
+	Global.gears_changed.connect(_update_gears)
 	_update_player_health(player.health, player.max_health)
+	_update_gears(Global.gears, 0)
 	_spawn_boss()
 
 
@@ -75,11 +79,10 @@ func _spawn_boss() -> void:
 	_boss.configure_for_stage(stage_resource)
 	_boss.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(_boss)
-	_boss.global_position = BOSS_SPAWN_POSITION
+	_boss.global_position = conveyor_mouth.global_position
 	_boss.health_changed.connect(_update_boss_health)
 	_boss.died.connect(_on_boss_died)
-	_boss_label.text = stage_resource.display_name
-	_boss_detail_label.text = stage_resource.ability
+	_boss_label.text = "%s  ·  %s" % [stage_resource.display_name, stage_resource.ability]
 	_update_boss_health(_boss.health, _boss.max_health)
 
 
@@ -98,10 +101,9 @@ func _on_boss_died(_robot: Node2D, _was_boss: bool, gear_reward: int) -> void:
 		hazard.queue_free()
 	var stage := HelperFunctions.get_stage_resource()
 	var stage_name := stage.display_name if stage != null else "Robot"
-	_boss_label.text = "DEFEATED · %s" % stage_name
-	_boss_detail_label.text = "Choose repair or continue"
+	_boss_label.text = "STAGE CLEARED  ·  %s" % stage_name
 	_boss_health_bar.value = 0.0
-	_boss_health_value_label.text = "0 / %d" % roundi(_boss.max_health)
+	_stage_label.text = "THE BOSS BROKE DOWN · %d GEARS LOOTED" % gear_reward
 	_station_hint.text = "Use E at REPAIR / REFIT SHOP or MOVE TO NEXT STAGE"
 	_station_hint.visible = true
 	call_deferred("_deploy_intermission_platforms")
@@ -122,7 +124,7 @@ func _update_player_health(current: float, maximum: float) -> void:
 		return
 	_player_health_bar.max_value = maximum
 	_player_health_bar.value = current
-	_player_health_label.text = "HUMAN FRAME"
+	_player_health_label.text = "FRAME  %d / %d" % [roundi(current), roundi(maximum)]
 
 
 func _update_boss_health(current: float, maximum: float) -> void:
@@ -130,7 +132,11 @@ func _update_boss_health(current: float, maximum: float) -> void:
 		return
 	_boss_health_bar.max_value = maximum
 	_boss_health_bar.value = current
-	_boss_health_value_label.text = "%d / %d" % [roundi(current), roundi(maximum)]
+
+
+func _update_gears(total_gears: int, _change: int) -> void:
+	if is_instance_valid(_gear_label):
+		_gear_label.text = "GEARS  %d" % total_gears
 
 
 ## Offer exactly two post-boss choices: repair/refit, or move to the next boss.
@@ -202,6 +208,88 @@ func _build_arena_variant(stage: StageData) -> void:
 	floor_visual.color = tint.lightened(0.65)
 	left_wall_visual.color = tint.lightened(0.8)
 	right_wall_visual.color = tint.lightened(0.8)
+	conveyor_visual.color = tint.lerp(Color(0.95, 0.38, 0.16), 0.55)
+
+
+## Create the arena HUD and pause panel from runtime controls.
+func _build_hud(stage: StageData) -> void:
+	# Build the HUD and pause panel in code so the shared arena scene stays data-driven.
+	var layer := CanvasLayer.new()
+	layer.name = "HUD"
+	add_child(layer)
+	var frame := Control.new()
+	frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(frame)
+
+	var status := VBoxContainer.new()
+	status.position = Vector2(24, 18)
+	status.size = Vector2(340, 90)
+	status.add_theme_constant_override("separation", 4)
+	frame.add_child(status)
+	_player_health_label = Label.new()
+	_player_health_label.text = "FRAME"
+	_player_health_label.add_theme_font_size_override("font_size", 18)
+	status.add_child(_player_health_label)
+	_player_health_bar = _make_bar(Color(0.2, 0.82, 0.56), Vector2(330, 18))
+	status.add_child(_player_health_bar)
+	var controls := Label.new()
+	controls.text = "A/D MOVE · SPACE JUMP · Q DASH\nM1 LIGHT · M2 HEAVY · ESC PAUSE"
+	controls.add_theme_font_size_override("font_size", 11)
+	status.add_child(controls)
+	var ability_controls := Label.new()
+	var unlocked_controls := PackedStringArray()
+	if HelperFunctions.is_ability_unlocked(&"emp"):
+		unlocked_controls.append("Z EMP")
+	if HelperFunctions.is_ability_unlocked(&"repair"):
+		unlocked_controls.append("X REPAIR")
+	if HelperFunctions.is_ability_unlocked(&"overclock"):
+		unlocked_controls.append("C OVERDRIVE")
+	ability_controls.text = "  ·  ".join(unlocked_controls)
+	ability_controls.visible = not unlocked_controls.is_empty()
+	ability_controls.add_theme_font_size_override("font_size", 11)
+	status.add_child(ability_controls)
+
+	_gear_label = Label.new()
+	_gear_label.position = Vector2(880, 18)
+	_gear_label.size = Vector2(240, 32)
+	_gear_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_gear_label.add_theme_font_size_override("font_size", 20)
+	frame.add_child(_gear_label)
+
+	_stage_label = Label.new()
+	_stage_label.text = stage.title
+	_stage_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_stage_label.position = Vector2(360, 16)
+	_stage_label.size = Vector2(430, 26)
+	_stage_label.add_theme_font_size_override("font_size", 17)
+	frame.add_child(_stage_label)
+
+	var boss_status := VBoxContainer.new()
+	boss_status.position = Vector2(400, 45)
+	boss_status.size = Vector2(350, 58)
+	boss_status.add_theme_constant_override("separation", 4)
+	frame.add_child(boss_status)
+	_boss_label = Label.new()
+	_boss_label.text = stage.display_name
+	_boss_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_status.add_child(_boss_label)
+	_boss_health_bar = _make_bar(Color(0.9, 0.2, 0.22), Vector2(330, 18))
+	boss_status.add_child(_boss_health_bar)
+
+	_station_hint = Label.new()
+	_station_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	_station_hint.offset_top = -54
+	_station_hint.offset_bottom = -26
+	_station_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_station_hint.add_theme_font_size_override("font_size", 16)
+	_station_hint.visible = false
+	frame.add_child(_station_hint)
+
+	# The shared pause menu stays active while the arena and player are paused.
+	_pause_menu = PAUSE_MENU_SCENE.instantiate() as PauseMenu
+	if _pause_menu != null:
+		frame.add_child(_pause_menu)
 
 
 func _toggle_pause() -> void:
@@ -210,3 +298,19 @@ func _toggle_pause() -> void:
 	get_tree().paused = should_pause
 	if _pause_menu != null:
 		_pause_menu.set_menu_visible(should_pause)
+
+
+func _make_bar(fill_color: Color, minimum_size: Vector2) -> ProgressBar:
+	var bar := ProgressBar.new()
+	bar.custom_minimum_size = minimum_size
+	bar.show_percentage = false
+	bar.add_theme_stylebox_override("fill", _make_stylebox(fill_color))
+	bar.add_theme_stylebox_override("background", _make_stylebox(Color(0.12, 0.14, 0.18)))
+	return bar
+
+
+func _make_stylebox(color: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = color
+	style.set_corner_radius_all(4)
+	return style

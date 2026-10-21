@@ -1,42 +1,6 @@
 class_name HelperFunctions
 extends RefCounted
 
-const DAMAGE_NUMBER_SCENE: PackedScene = preload("res://scenes/ui/damage_number.tscn")
-
-
-## Add a short floating damage label above a world target, with a distinct color per side.
-static func show_damage_number(target: Node2D, amount: float, tint: Color) -> void:
-	if target == null or amount <= 0.0:
-		return
-	var scene_root := Global.get_tree().current_scene
-	if scene_root == null:
-		return
-	var number := DAMAGE_NUMBER_SCENE.instantiate() as DamageNumber
-	if number == null:
-		return
-	number.configure(roundi(amount), tint, target.global_position + Vector2(0.0, -32.0))
-	scene_root.add_child(number)
-
-
-## Shake the active 2D camera briefly for heavy impacts, then restore its original offset.
-static func screen_shake(source: Node, strength: float = 8.0, duration: float = 0.16) -> void:
-	if source == null or duration <= 0.0:
-		return
-	var camera := source.get_viewport().get_camera_2d()
-	if camera == null:
-		return
-	var original_offset := camera.offset
-	var tween := camera.create_tween()
-	var pulse_duration := duration / 4.0
-	for _pulse in 3:
-		tween.tween_property(
-			camera,
-			"offset",
-			original_offset + Vector2(randf_range(-strength, strength), randf_range(-strength, strength)),
-			pulse_duration
-		)
-	tween.tween_property(camera, "offset", original_offset, pulse_duration)
-
 
 static func add_gears(amount: int) -> bool:
 	if amount <= 0:
