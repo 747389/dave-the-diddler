@@ -14,7 +14,6 @@ const SHOP_CARD_SCENE: PackedScene = preload("res://scenes/ui/shop_card.tscn")
 
 
 func _ready() -> void:
-	Global.gears += 10000
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	# The scene owns the fixed layout; these buttons call purchase and stage-flow actions.
 	_restart_button.pressed.connect(HelperFunctions.restart_run)
