@@ -1,50 +1,203 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://qtpibkoumbv1"]
 
 [ext_resource type="Script" uid="uid://oc8ted5mvkdk" path="res://scripts/tutorial/tutorial.gd" id="1_tutorial"]
-[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
-[ext_resource type="PackedScene" path="res://scenes/tutorial/training_dummy.tscn" id="3_dummy"]
+[ext_resource type="PackedScene" uid="uid://6b020l5qfx7x" path="res://scenes/player/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://qbxlufoebl7r" path="res://scenes/tutorial/training_dummy.tscn" id="3_dummy"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="4_pause_menu"]
+[ext_resource type="PackedScene" path="res://scenes/world/fall_boundary.tscn" id="5_fall_boundary"]
+[ext_resource type="LabelSettings" path="res://assets/ui/input_tip_label.tres" id="6_input_tip"]
 
 [sub_resource type="RectangleShape2D" id="TrainingFloorShape"]
-size = Vector2(1520, 80)
+size = Vector2(862, 80)
+
+[sub_resource type="RectangleShape2D" id="FarFloorShape"]
+size = Vector2(431, 80)
 
 [sub_resource type="RectangleShape2D" id="JumpPlatformShape"]
 size = Vector2(220, 24)
 
-[node name="Tutorial" type="Node2D"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g4v7s"]
+bg_color = Color(0.1764706, 0.1764706, 0.1764706, 0.5411765)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="Tutorial" type="Node2D" unique_id=1197706076]
 script = ExtResource("1_tutorial")
 metadata/map_type = "movement_and_combat_training"
 
-[node name="Background" type="Polygon2D" parent="."]
-color = Color(0.035, 0.055, 0.085, 1)
-polygon = PackedVector2Array(-900, -500, 900, -500, 900, 620, -900, 620)
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1650146436]
+z_index = -1
+offset_left = -1014.0
+offset_right = 2975.0
+offset_bottom = 1951.0
+color = Color(0, 0, 0, 1)
 
-[node name="Floor" type="StaticBody2D" parent="."]
-position = Vector2(0, 520)
-collision_layer = 1
+[node name="Floor" type="StaticBody2D" parent="." unique_id=1623857596]
+position = Vector2(900, 1020)
 collision_mask = 0
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Floor" unique_id=306805949]
+position = Vector2(-184, 0)
 shape = SubResource("TrainingFloorShape")
 
-[node name="Visual" type="Polygon2D" parent="Floor"]
+[node name="Visual" type="Polygon2D" parent="Floor" unique_id=1755079718]
+position = Vector2(-185.00002, 0)
+scale = Vector2(0.9347826, 1)
 color = Color(0.18, 0.23, 0.32, 1)
-polygon = PackedVector2Array(-760, -40, 760, -40, 760, 40, -760, 40)
+polygon = PackedVector2Array(-460, -40, 460, -40, 460, -0.24578857, 460, 40, -460, 40)
 
-[node name="JumpPlatform" type="StaticBody2D" parent="."]
-position = Vector2(20, 400)
-collision_layer = 1
+[node name="FarFloor" type="StaticBody2D" parent="." unique_id=60278738]
+position = Vector2(1461.5, 1020)
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FarFloor" unique_id=1355454463]
+position = Vector2(174, 0)
+shape = SubResource("FarFloorShape")
+
+[node name="Visual" type="Polygon2D" parent="FarFloor" unique_id=1778346970]
+position = Vector2(173.5, 0)
+scale = Vector2(0.83883494, 1)
+color = Color(0.18, 0.23, 0.32, 1)
+polygon = PackedVector2Array(-257.5, -40, 257.5, -40, 257.5, -1.1748962, 257.5, 40, -257.5, 40, -257.5, 0.6498718)
+
+[node name="JumpPlatform" type="StaticBody2D" parent="." unique_id=738566380]
+position = Vector2(650, 920)
 collision_mask = 0
 metadata/objective = "jump_to_platform"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="JumpPlatform"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="JumpPlatform" unique_id=1354082300]
 shape = SubResource("JumpPlatformShape")
 
-[node name="Visual" type="Polygon2D" parent="JumpPlatform"]
+[node name="Visual" type="Polygon2D" parent="JumpPlatform" unique_id=2124841165]
 color = Color(0.3, 0.48, 0.63, 1)
 polygon = PackedVector2Array(-110, -12, 110, -12, 110, 12, -110, 12)
 
-[node name="Player" parent="." instance=ExtResource("2_player")]
-position = Vector2(-560, 458)
+[node name="Player" parent="." unique_id=687132582 instance=ExtResource("2_player")]
+position = Vector2(341, 938)
+attack_damage = 10.0
 
-[node name="TrainingDummy" parent="." instance=ExtResource("3_dummy")]
-position = Vector2(465, 453)
+[node name="FallBoundary" parent="." unique_id=290617856 instance=ExtResource("5_fall_boundary")]
+position = Vector2(900, 1450)
+spawn_position = Vector2(341, 938)
+
+[node name="ShootDummy" parent="." unique_id=856494226 instance=ExtResource("3_dummy")]
+visible = false
+position = Vector2(900, 780)
+display_name = "SHOOTING TARGET"
+
+[node name="MeleeDummy" parent="." unique_id=190027164 instance=ExtResource("3_dummy")]
+visible = false
+position = Vector2(500, 958)
+max_health = 60.0
+display_name = "MELEE TARGET"
+
+[node name="FinalDummy" parent="." unique_id=263689497 instance=ExtResource("3_dummy")]
+position = Vector2(1607, 953)
+max_health = 240.0
+display_name = "FINAL TARGET"
+
+[node name="TutorialHUD" type="CanvasLayer" parent="." unique_id=575783896]
+
+[node name="ObjectivePanel" type="PanelContainer" parent="TutorialHUD" unique_id=1162871414]
+custom_minimum_size = Vector2(430, 0)
+offset_left = 17.0
+offset_top = 49.0
+offset_right = 457.0
+offset_bottom = 155.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4v7s")
+
+[node name="MarginContainer" type="MarginContainer" parent="TutorialHUD/ObjectivePanel" unique_id=542949718]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="ObjectiveContent" type="VBoxContainer" parent="TutorialHUD/ObjectivePanel/MarginContainer" unique_id=707022009]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="StepText" type="Label" parent="TutorialHUD/ObjectivePanel/MarginContainer/ObjectiveContent" unique_id=226144863]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="ObjectiveText" type="Label" parent="TutorialHUD/ObjectivePanel/MarginContainer/ObjectiveContent" unique_id=1629975799]
+custom_minimum_size = Vector2(430, 20)
+custom_maximum_size = Vector2(430, 430)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 3
+
+[node name="ControlsText" type="Label" parent="TutorialHUD" unique_id=814241149]
+offset_left = 21.0
+offset_top = 21.0
+offset_right = 697.0
+offset_bottom = 45.0
+text = "MOVE A/D · JUMP SPACE · PAUSE ESC"
+label_settings = ExtResource("6_input_tip")
+
+[node name="DummyPanel" type="PanelContainer" parent="TutorialHUD" unique_id=1876684184]
+visible = false
+custom_minimum_size = Vector2(350, 0)
+offset_left = 890.0
+offset_top = 22.0
+offset_right = 1240.0
+offset_bottom = 78.0
+
+[node name="DummyContent" type="VBoxContainer" parent="TutorialHUD/DummyPanel" unique_id=305719022]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="DummyHealthText" type="Label" parent="TutorialHUD/DummyPanel/DummyContent" unique_id=1587785552]
+layout_mode = 2
+text = "TRAINING DUMMY"
+horizontal_alignment = 1
+
+[node name="DummyHealthBar" type="ProgressBar" parent="TutorialHUD/DummyPanel/DummyContent" unique_id=1438571803]
+custom_minimum_size = Vector2(0, 18)
+layout_mode = 2
+show_percentage = false
+
+[node name="CompletionPanel" type="PanelContainer" parent="TutorialHUD" unique_id=414443851]
+visible = false
+custom_minimum_size = Vector2(430, 0)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -215.0
+offset_top = -130.0
+offset_right = 215.0
+offset_bottom = 130.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CompletionContent" type="VBoxContainer" parent="TutorialHUD/CompletionPanel" unique_id=576181513]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CompletionTitle" type="Label" parent="TutorialHUD/CompletionPanel/CompletionContent" unique_id=1958340865]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "TRAINING COMPLETE"
+horizontal_alignment = 1
+
+[node name="CompletionText" type="Label" parent="TutorialHUD/CompletionPanel/CompletionContent" unique_id=21154401]
+layout_mode = 2
+text = "You moved, jumped, aimed, used both weapons, and dashed across the gap. Ready for the campaign."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="CampaignButton" type="Button" parent="TutorialHUD/CompletionPanel/CompletionContent" unique_id=1498315482]
+layout_mode = 2
+text = "START CAMPAIGN"
+
+[node name="TitleButton" type="Button" parent="TutorialHUD/CompletionPanel/CompletionContent" unique_id=1026505923]
+layout_mode = 2
+text = "RETURN TO TITLE"
+
+[node name="PauseMenu" parent="TutorialHUD" unique_id=1977020002 instance=ExtResource("4_pause_menu")]
+visible = false

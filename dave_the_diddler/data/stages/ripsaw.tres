@@ -20,5 +20,5 @@ can_jump = false
 can_flash_step = false
 flash_step_distance = 150.0
 attack_damage = 22.0
-ability = "Two radial volleys in every direction"
+ability = "Radial volleys / sniper beams / bullet rain"
 arena_color = Color(0.045, 0.105, 0.12, 1)

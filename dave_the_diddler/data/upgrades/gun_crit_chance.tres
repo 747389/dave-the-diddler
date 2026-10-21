@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="UpgradeData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/resource_scripts/upgrade_data.gd" id="1_upgrade"]
+
+[resource]
+script = ExtResource("1_upgrade")
+key = &"gun_crit_chance"
+display_name = "Critical Targeting"
+description = "Add 1 percentage point to gun critical chance per level. Starts at 1%; caps at 10%."
+effect_type = "bonus"
+effect_per_level = 0.01
+base_cost = 50
+cost_growth = 1.55
+max_level = 9

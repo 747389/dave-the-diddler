@@ -33,11 +33,16 @@ window/stretch/aspect="expand"
 folder_colors={
 "res://assets/": "red",
 "res://data/": "green",
+"res://other_assets/": "orange",
 "res://scenes/": "blue",
 "res://scripts/": "gray",
 "res://shaders/": "purple",
 "res://sounds/": "orange"
 }
+
+[gui]
+
+theme/custom="res://assets/ui/game_theme.tres"
 
 [layer_names]
 

@@ -1,8 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://dk34hy5rrdhkg"]
 
 [ext_resource type="PackedScene" path="res://scenes/bosses/robot.tscn" id="1_base"]
-[ext_resource type="Script" path="res://scripts/bosses/ripsaw_boss.gd" id="2_behavior"]
+[ext_resource type="Script" uid="uid://cnr7lg74fu173" path="res://scripts/bosses/ripsaw_boss.gd" id="2_behavior"]
 
-[node name="Ripsaw" instance=ExtResource("1_base")]
+[node name="Ripsaw" unique_id=1021537149 instance=ExtResource("1_base")]
 script = ExtResource("2_behavior")
 metadata/entity_type = "ripsaw_boss"

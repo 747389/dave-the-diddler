@@ -1,0 +1,8 @@
+[gd_resource type="LabelSettings" load_steps=2 format=3]
+
+[ext_resource type="FontFile" path="res://other_assets/Chakra_Petch/ChakraPetch-BoldItalic.ttf" id="1_chakra_petch_bold_italic"]
+
+[resource]
+font = ExtResource("1_chakra_petch_bold_italic")
+font_size = 15
+font_color = Color(0.78, 0.83, 0.88, 1)

@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://bplp5i2nfggwq"]
 
-[ext_resource type="Script" path="res://scripts/ui/shop.gd" id="1_shop"]
+[ext_resource type="Script" uid="uid://c1lunt044riip" path="res://scripts/ui/shop.gd" id="1_shop"]
 
-[node name="Shop" type="Control"]
+[node name="Shop" type="Control" unique_id=760187963]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,3 +11,112 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_shop")
 metadata/screen_type = "upgrade_shop"
+
+[node name="Background" type="ColorRect" parent="." unique_id=820622107]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.055, 0.075, 0.11, 1)
+
+[node name="Margin" type="MarginContainer" parent="." unique_id=1366804096]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 28
+
+[node name="Layout" type="VBoxContainer" parent="Margin" unique_id=705562006]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Header" type="HBoxContainer" parent="Margin/Layout" unique_id=1736839600]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Margin/Layout/Header" unique_id=556341669]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "REFIT BAY"
+
+[node name="GearLabel" type="Label" parent="Margin/Layout/Header" unique_id=194117699]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 2
+
+[node name="Subtitle" type="Label" parent="Margin/Layout" unique_id=1255782180]
+layout_mode = 2
+
+[node name="Columns" type="HBoxContainer" parent="Margin/Layout" unique_id=557480863]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+
+[node name="UpgradePanel" type="PanelContainer" parent="Margin/Layout/Columns" unique_id=1286009025]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="UpgradeContent" type="VBoxContainer" parent="Margin/Layout/Columns/UpgradePanel" unique_id=466282986]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="UpgradeHeading" type="Label" parent="Margin/Layout/Columns/UpgradePanel/UpgradeContent" unique_id=530808232]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "UPGRADES"
+
+[node name="UpgradeScroll" type="ScrollContainer" parent="Margin/Layout/Columns/UpgradePanel/UpgradeContent" unique_id=1328509116]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="UpgradeEntries" type="VBoxContainer" parent="Margin/Layout/Columns/UpgradePanel/UpgradeContent/UpgradeScroll" unique_id=360241044]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="UnlockPanel" type="PanelContainer" parent="Margin/Layout/Columns" unique_id=2047327951]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="UnlockContent" type="VBoxContainer" parent="Margin/Layout/Columns/UnlockPanel" unique_id=1548139167]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="UnlockHeading" type="Label" parent="Margin/Layout/Columns/UnlockPanel/UnlockContent" unique_id=1707099215]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "UNLOCKS"
+
+[node name="UnlockScroll" type="ScrollContainer" parent="Margin/Layout/Columns/UnlockPanel/UnlockContent" unique_id=1006350797]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="UnlockEntries" type="VBoxContainer" parent="Margin/Layout/Columns/UnlockPanel/UnlockContent/UnlockScroll" unique_id=311127889]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Footer" type="HBoxContainer" parent="Margin/Layout" unique_id=2045941245]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 2
+
+[node name="RestartButton" type="Button" parent="Margin/Layout/Footer" unique_id=2129932989]
+layout_mode = 2
+
+[node name="RepairButton" type="Button" parent="Margin/Layout/Footer" unique_id=478599358]
+layout_mode = 2
+text = "Repair frame · 20 gears"
+
+[node name="ContinueButton" type="Button" parent="Margin/Layout/Footer" unique_id=1202958112]
+layout_mode = 2
